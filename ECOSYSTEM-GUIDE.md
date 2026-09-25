@@ -259,13 +259,14 @@ flowchart TB
     TRI -->|"open-work.json"| MAR
     PH -.->|"scans for unpushed"| GIT
     GIT -.->|"git history"| HEA
-    HEA -->|"where I left off"| MAR
+    HEA -->|"last updated +<br/>hand-typed note"| MAR
     TRI -.-> MB
     HEA -.-> MB
     SB -.->|"prospects"| MB
     INT -.->|"open findings"| MB
-    MB -->|"refreshes snapshots<br/>+ activity data"| MAR
+    MB -->|"refreshes doc snapshots +<br/>derived 'where I left off'"| MAR
     PC -.->|"life-domain distillate"| LOOM
+    LOOM -->|"check-in answers"| PC
     SI -.-> LOOM
     MAR -.-> LOOM
     TRI -.-> LOOM
@@ -300,7 +301,7 @@ flowchart LR
 
     SI -.->|"via synced snapshots"| MUS
     MAR -.->|"compared against"| MUS
-    MUS -->|"auto-fixes timestamps"| MAR
+    MUS -->|"doc flags +<br/>timestamps"| MAR
     MUS -->|"opens findings"| REC
     REC -->|"repairs"| SI
     REC -->|"repairs"| MAR
@@ -323,19 +324,21 @@ a project folder is created with its own `STATUS.md` and `INTENT.md`, and
 
 From project `STATUS.md` files, **Triage** extracts open work and writes it
 out for Marius to show as a project's "next actions." From the tracked git
-repositories, **Hearth** reads what actually changed and what's going cold,
-and writes each project's "where I left off" and last-updated date into
-Marius directly — so, as of 2026-09-19, the board shows derived values rather
-than trusting hand-typed ones to stay correct. **Morning Brief** combines
-Triage, Hearth, open Reconciliation findings, and new tool candidates from
-Shadowboard into one daily read, and refreshes Marius's copies of the project
-docs and its engagement data as it goes. **Push Hygiene** runs on demand
+repositories, **Hearth** reads what actually changed and what's going cold;
+its going-cold warnings go into the daily brief, and it also updates each
+project's last-updated date and hand-typed note in Marius. **Morning Brief**
+combines Triage, Hearth, open Reconciliation findings, and new tool
+candidates from Shadowboard into one daily read, and refreshes Marius's
+copies of the project docs as it goes. From those copies, Marius derives a
+project's "where I left off" — the newest dated entry in its own
+`STATUS.md` — so, as of 2026-09-19, the board shows values read from the
+source rather than trusting hand-typed ones to stay correct. **Push Hygiene** runs on demand
 across the same repositories to catch commits that exist locally but were
 never pushed — quiet git debt that neither Triage nor Hearth would otherwise
 notice.
 
 **Muster** compares the registry against synced copies of the project docs,
-fixes pure-fact timestamp drift itself, and opens findings for everything
+writes doc-presence flags and fixes pure-fact timestamp drift itself, and opens findings for everything
 else; **Reconciliation** investigates those findings and repairs whichever
 side is wrong — the registry, or the source docs. **S&I integrity routines**
 check that source documents are well-formed and that the interface displays
@@ -346,8 +349,9 @@ thing nothing else does: read everything's *distillates* and ask whether the
 sum of the work still points at what the owner said he was trying to do.
 
 **Meridian** is the registry of which system owns what, consulted *before*
-building anything new — it governs the boundaries of every box in this
-diagram, including itself.
+building anything new — it governs the boundaries of every registered
+system in these diagrams, including itself (Master Reader and the git
+repositories are a project and raw material, not registered systems).
 
 **Master Reader** is the web interface through which nearly all of this
 becomes readable.
@@ -386,9 +390,11 @@ only as history. None of the systems above is currently Parked, Shelved, or
 Deprecated.
 
 Active means the system exists and is maintained, not that every feature
-inside it has shipped or that it runs on a schedule — several routines above
-run only when asked. For feature-level detail, this document points at each
-system's own `STATUS.md` rather than restating it.
+inside it has shipped or that it runs on a schedule. By design, Muster runs
+on its own weekly schedule and Morning Brief is the daily routine; Triage and
+Hearth have no schedule of their own and run as steps inside Morning Brief;
+everything else runs when asked. For feature-level detail, this document
+points at each system's own `STATUS.md` rather than restating it.
 
 ---
 
@@ -419,16 +425,20 @@ deliberately allowed to touch, and where that touching becomes a defect.**
   design: P&C is the *upstream compressor*. Loom reads distillates only,
   never raw material — so when a domain would otherwise be invisible, the
   fix is to build a compressor for it, not widen what Loom reads directly.
+  Loom may *collect* a life check-in when the last sweep is stale, and drops
+  the answers into Progress & Clarity's inbox — only the sweep folds them
+  into the ledger.
 - **Progress & Clarity and Marius both describe things that could become
   projects.** The boundary is promotion: before it's real, P&C owns it;
   after, Marius and the project's own files do. The P&C entry survives as
   origin history, never deleted.
-- **Triage and Hearth both feed the daily brief, and — as of 2026-09-19 —
-  both feed Marius directly.** One reads stated obligation, the other
-  observed activity. Marius now renders their outputs as a project's
-  "next actions" and "where I left off," and treats any hand-typed version of
-  those same fields as a labelled override rather than a competing truth.
-  This is the clearest live example of *how* two systems are meant to
+- **Triage and Hearth both feed the daily brief; Marius reads derived
+  values instead of hand-typed ones.** One reads stated obligation, the
+  other observed activity. As of 2026-09-19 Marius renders Triage's output
+  as a project's "next actions," and derives "where I left off" from the
+  newest dated entry in the project's own `STATUS.md`. Any hand-typed
+  version of either field is shown as a labelled override, not a competing
+  truth. This is the clearest live example of *how* two systems are meant to
   interact without corrupting each other: Marius consumes, it doesn't
   re-derive.
 - **Muster and Reconciliation split detection from repair on purpose.** The
@@ -513,7 +523,10 @@ Each entry below is enough to understand the system's role; its own
   in full plus whatever new input has arrived (voice notes, annotations,
   periodic check-ins), folds it into permanent per-idea entries, writes a
   dated snapshot, and archives the raw input so it's never re-read. Only the
-  sweep writes the ledger. A newer human-review gate can pause the sweep
+  sweep integrates anything into the ledger. One narrow exception: when a
+  plan is worked out in conversation after a sweep, a single dated pointer
+  line may be added to that entry early, so the plan is visible before the
+  next sweep folds it in properly. A newer human-review gate can pause the sweep
   mid-batch and ask the owner directly when an item is genuinely ambiguous,
   rather than guessing or silently skipping it. Full mechanics:
   `Master-Reader/progress-clarity/STATUS.md` and `INTENT.md`.
@@ -523,15 +536,16 @@ Each entry below is enough to understand the system's role; its own
   changes. Everything downstream treats edits to these files as the actual
   change, not a report about one.
 - **Marius.** A hand- and script-maintained data file rendered as a board.
-  As of 2026-09-19 its "where I left off" and "next actions" fields are
-  populated from Triage's and Hearth's generated output rather than typed by
-  hand, with any hand-typed value shown as a labelled override rather than
-  silently replaced.
+  As of 2026-09-19 its "next actions" come from Triage's generated output
+  and its "where I left off" is derived from the newest dated entry in each
+  project's `STATUS.md`, rather than typed by hand; any hand-typed value is
+  shown as a labelled override rather than silently replaced.
 - **Triage / Hearth / Morning Brief.** Triage parses every tracked
   `STATUS.md` for open-work headings into a short daily list. Hearth reads
   git log across tracked repos for what changed and what's gone quiet.
-  Morning Brief runs both plus a check of open Reconciliation findings, and
-  combines the three into one read.
+  Neither has a schedule of its own: Morning Brief runs both as steps, plus
+  a check of open Reconciliation findings and tool-registry prospects, and
+  combines them into one read.
 - **Muster / Reconciliation.** Muster runs weekly on a schedule, compares Marius
   against the S&I files it claims to reflect, and writes dated findings —
   including auto-correcting pure-fact timestamp drift with no finding
@@ -606,9 +620,11 @@ on a weekly schedule, without the owner having to go looking; findings queue
 until Reconciliation — run on request — verifies and repairs them. Detection
 is automatic; repair is one deliberate step.
 
-**Solved:** a project quietly going cold. Hearth's activity read and
-Marius's now-derived "where I left off" mean staleness is visible on the
-board itself, not something you have to remember to suspect.
+**Solved:** a project quietly going cold. The board's derived "where I left
+off" shows the date of the project's newest dated `STATUS.md` entry — or says
+there's none in the last 60 days — and Hearth's going-cold warning names
+silent projects in the daily brief. Staleness is visible without having to
+remember to suspect it.
 
 **Partially solved:** an idea that gets *talked about* without ever
 *advancing*. Progress & Clarity's ledger historically conflated "recently
@@ -746,7 +762,7 @@ well-instrumented.
 |---|---|
 | **Potential** | An idea, ambition, habit, or system idea tracked in Progress & Clarity. The atomic unit there. |
 | **Ledger** | `LEDGER.md` — Progress & Clarity's canonical memory. One permanent entry per potential. |
-| **Sweep** | The batch process that folds new input into the ledger, writes a snapshot, archives the input. The only writer of the ledger. |
+| **Sweep** | The batch process that folds new input into the ledger, writes a snapshot, archives the input. The only thing that integrates input into the ledger (a plan follow-up may leave one pointer line early; §8). |
 | **Publish** | Sending notes written in the interface out of the browser into Progress & Clarity's inbox, so the next sweep can read them. Until then they exist in one browser only. |
 | **Park / back burner** | Hiding an entry from the default view. Currently a browser-only display setting; the sweep never sees it. |
 | **Promotion** | The handoff when a potential becomes a real project: a project folder with `STATUS.md`/`INTENT.md`, a record in Marius, the P&C entry retired as an origin record. |
@@ -868,3 +884,9 @@ registry, say so plainly rather than defending the design.
   real example, removed the owner's name, and corrected the header's
   safety claim, which had said "invented examples throughout" while §9
   described a real event.
+- 2026-09-25 — Grounding check against code and routine files: "where I
+  left off" is derived from each project's newest dated `STATUS.md` entry,
+  not from Hearth (corrected in the flow diagram, §5.1, §6.2, §8, §9); added
+  Loom's check-in write into Progress & Clarity; widened Muster's write
+  label; narrowed "only the sweep writes the ledger" to its real exception;
+  stated which routines have their own schedule.
